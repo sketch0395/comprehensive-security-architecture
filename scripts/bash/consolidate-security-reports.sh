@@ -389,7 +389,8 @@ echo -e "${PURPLE}📈 Generating dynamic security dashboard...${NC}"
 
 # Use Python script to generate dashboard with real data
 if command -v python3 &> /dev/null; then
-    python3 "$(dirname "$0")/generate-dynamic-dashboard.py" "$(pwd)/reports" "$UNIFIED_DIR/dashboards/security-dashboard.html"
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    python3 "$(dirname "$SCRIPT_DIR")/generate-dynamic-dashboard.py" "$(pwd)/reports" "$UNIFIED_DIR/dashboards/security-dashboard.html"
 else
     echo -e "${YELLOW}⚠️  Python3 not found. Generating basic dashboard...${NC}"
     

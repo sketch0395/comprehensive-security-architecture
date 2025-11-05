@@ -147,22 +147,22 @@ case "$SCAN_TYPE" in
         print_section "Quick Security Scan (Core Tools Only) - Target: $(basename "$TARGET_DIR")"
         
         # Core security tools - filesystem only
-        run_security_tool "TruffleHog Secret Detection" "$REPO_ROOT/scripts/run-trufflehog-scan.sh" "filesystem"
-        run_security_tool "Grype Vulnerability Scanning" "$REPO_ROOT/scripts/run-grype-scan.sh" "filesystem"
-        run_security_tool "Trivy Security Analysis" "$REPO_ROOT/scripts/run-trivy-scan.sh" "filesystem"
-        run_security_tool "ClamAV Antivirus Scan" "$REPO_ROOT/scripts/run-clamav-scan.sh"
+        run_security_tool "TruffleHog Secret Detection" "$SCRIPT_DIR/run-trufflehog-scan.sh" "filesystem"
+        run_security_tool "Grype Vulnerability Scanning" "$SCRIPT_DIR/run-grype-scan.sh" "filesystem"
+        run_security_tool "Trivy Security Analysis" "$SCRIPT_DIR/run-trivy-scan.sh" "filesystem"
+        run_security_tool "ClamAV Antivirus Scan" "$SCRIPT_DIR/run-clamav-scan.sh"
         ;;
         
     "images")
         print_section "Container Image Security Scan (All Image Types) - Target: $(basename "$TARGET_DIR")"
         
         # Multi-target container image scanning
-        run_security_tool "TruffleHog Container Images" "$REPO_ROOT/scripts/run-trufflehog-scan.sh" "images"
-        run_security_tool "Grype Container Images" "$REPO_ROOT/scripts/run-grype-scan.sh" "images"
-        run_security_tool "Grype Base Images" "$REPO_ROOT/scripts/run-grype-scan.sh" "base"
-        run_security_tool "Trivy Container Images" "$REPO_ROOT/scripts/run-trivy-scan.sh" "images"
-        run_security_tool "Trivy Base Images" "$REPO_ROOT/scripts/run-trivy-scan.sh" "base"
-        run_security_tool "Xeol End-of-Life Detection" "$REPO_ROOT/scripts/run-xeol-scan.sh"
+        run_security_tool "TruffleHog Container Images" "$SCRIPT_DIR/run-trufflehog-scan.sh" "images"
+        run_security_tool "Grype Container Images" "$SCRIPT_DIR/run-grype-scan.sh" "images"
+        run_security_tool "Grype Base Images" "$SCRIPT_DIR/run-grype-scan.sh" "base"
+        run_security_tool "Trivy Container Images" "$SCRIPT_DIR/run-trivy-scan.sh" "images"
+        run_security_tool "Trivy Base Images" "$SCRIPT_DIR/run-trivy-scan.sh" "base"
+        run_security_tool "Xeol End-of-Life Detection" "$SCRIPT_DIR/run-xeol-scan.sh"
         ;;
         
     "analysis")
@@ -181,38 +181,38 @@ case "$SCAN_TYPE" in
         print_section "Complete Eight-Layer Security Architecture Scan - Target: $(basename "$TARGET_DIR")"
         
         echo -e "${PURPLE}🔐 Layer 1: Secret Detection (Multi-Target)${NC}"
-        run_security_tool "TruffleHog Filesystem" "$REPO_ROOT/scripts/run-trufflehog-scan.sh" "filesystem"
-        run_security_tool "TruffleHog Container Images" "$REPO_ROOT/scripts/run-trufflehog-scan.sh" "images"
+        run_security_tool "TruffleHog Filesystem" "$SCRIPT_DIR/run-trufflehog-scan.sh" "filesystem"
+        run_security_tool "TruffleHog Container Images" "$SCRIPT_DIR/run-trufflehog-scan.sh" "images"
         
         echo -e "${PURPLE}🦠 Layer 2: Malware Detection${NC}"
-        run_security_tool "ClamAV Antivirus Scan" "$REPO_ROOT/scripts/run-clamav-scan.sh"
+        run_security_tool "ClamAV Antivirus Scan" "$SCRIPT_DIR/run-clamav-scan.sh"
         
         echo -e "${PURPLE}☸️  Layer 3: Infrastructure Security${NC}"
-        run_security_tool "Checkov IaC Security" "$REPO_ROOT/scripts/run-checkov-scan.sh"
+        run_security_tool "Checkov IaC Security" "$SCRIPT_DIR/run-checkov-scan.sh"
         
         echo -e "${PURPLE}🔍 Layer 4: Vulnerability Detection (Multi-Target)${NC}"
-        run_security_tool "Grype Filesystem" "$REPO_ROOT/scripts/run-grype-scan.sh" "filesystem"
-        run_security_tool "Grype Container Images" "$REPO_ROOT/scripts/run-grype-scan.sh" "images"
-        run_security_tool "Grype Base Images" "$REPO_ROOT/scripts/run-grype-scan.sh" "base"
+        run_security_tool "Grype Filesystem" "$SCRIPT_DIR/run-grype-scan.sh" "filesystem"
+        run_security_tool "Grype Container Images" "$SCRIPT_DIR/run-grype-scan.sh" "images"
+        run_security_tool "Grype Base Images" "$SCRIPT_DIR/run-grype-scan.sh" "base"
         
         echo -e "${PURPLE}🛡️  Layer 5: Container Security (Multi-Target)${NC}"
-        run_security_tool "Trivy Filesystem" "$REPO_ROOT/scripts/run-trivy-scan.sh" "filesystem"
-        run_security_tool "Trivy Container Images" "$REPO_ROOT/scripts/run-trivy-scan.sh" "images"
-        run_security_tool "Trivy Base Images" "$REPO_ROOT/scripts/run-trivy-scan.sh" "base"
-        run_security_tool "Trivy Kubernetes" "$REPO_ROOT/scripts/run-trivy-scan.sh" "kubernetes"
+        run_security_tool "Trivy Filesystem" "$SCRIPT_DIR/run-trivy-scan.sh" "filesystem"
+        run_security_tool "Trivy Container Images" "$SCRIPT_DIR/run-trivy-scan.sh" "images"
+        run_security_tool "Trivy Base Images" "$SCRIPT_DIR/run-trivy-scan.sh" "base"
+        run_security_tool "Trivy Kubernetes" "$SCRIPT_DIR/run-trivy-scan.sh" "kubernetes"
         
         echo -e "${PURPLE}⚰️  Layer 6: End-of-Life Detection${NC}"
-        run_security_tool "Xeol EOL Detection" "$REPO_ROOT/scripts/run-xeol-scan.sh"
+        run_security_tool "Xeol EOL Detection" "$SCRIPT_DIR/run-xeol-scan.sh"
         
         # Optional layers if specific files/configs exist
         if [[ -f "$TARGET_DIR/package.json" ]]; then
             echo -e "${PURPLE}📊 Layer 7: Code Quality Analysis (Node.js)${NC}"
-            run_security_tool "SonarQube Analysis" "$REPO_ROOT/scripts/run-sonar-analysis.sh"
+            run_security_tool "SonarQube Analysis" "$SCRIPT_DIR/run-sonar-analysis.sh"
         fi
         
         if [[ -f "$TARGET_DIR/Chart.yaml" ]] || [[ -d "$TARGET_DIR/chart" ]] || [[ -d "$TARGET_DIR/charts" ]]; then
             echo -e "${PURPLE}🏗️  Layer 8: Helm Chart Building${NC}"
-            run_security_tool "Helm Chart Build" "$REPO_ROOT/scripts/run-helm-build.sh"
+            run_security_tool "Helm Chart Build" "$SCRIPT_DIR/run-helm-build.sh"
         fi
         ;;
         

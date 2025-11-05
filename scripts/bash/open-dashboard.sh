@@ -10,7 +10,7 @@ WHITE='\033[1;37m'
 NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DASHBOARD_PATH="$SCRIPT_DIR/../reports/security-reports/dashboards/security-dashboard.html"
+DASHBOARD_PATH="$SCRIPT_DIR/security-reports/dashboards/security-dashboard.html"
 
 echo -e "${WHITE}============================================${NC}"
 echo -e "${WHITE}🛡️  Security Dashboard Launcher${NC}"
