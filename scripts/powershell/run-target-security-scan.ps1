@@ -3,8 +3,8 @@
 # Usage: .\run-target-security-scan.ps1 <target_directory> [quick|full|images|analysis]
 
 param(
-    [Parameter(Mandatory=$true, Position=0)]
-    [string]$TargetDir,
+    [Parameter(Position=0)]
+    [string]$TargetDir = "",
     
     [Parameter(Position=1)]
     [ValidateSet("quick", "full", "images", "analysis")]
@@ -27,21 +27,22 @@ $ScriptsRoot = Split-Path -Parent $ScriptDir
 $RepoRoot = Split-Path -Parent $ScriptsRoot
 $Timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
-# Validate inputs
-if (-not $TargetDir) {
-    Write-Host "❌ Error: Target directory is required" -ForegroundColor $RED
-    Write-Host "Usage: .\run-target-security-scan.ps1 <target_directory> [quick|full|images|analysis]"
-    Write-Host ""
-    Write-Host "Examples:"
-    Write-Host "  .\run-target-security-scan.ps1 'C:\Users\rnelson\Desktop\CDAO Marketplace\advana-marketplace-monolith-node' full"
-    Write-Host "  .\run-target-security-scan.ps1 '.\my-project' quick"
-    Write-Host "  .\run-target-security-scan.ps1 'C:\path\to\project' images"
-    exit 1
+# Default to current directory if not specified
+if ([string]::IsNullOrWhiteSpace($TargetDir)) {
+    $TargetDir = Get-Location
+    Write-Host "ℹ️  No target directory specified - using current directory" -ForegroundColor $CYAN
 }
 
 # Resolve absolute path
 if (-not (Test-Path $TargetDir)) {
     Write-Host "❌ Error: Target directory does not exist: $TargetDir" -ForegroundColor $RED
+    Write-Host ""
+    Write-Host "Usage: .\run-target-security-scan.ps1 [target_directory] [quick|full|images|analysis]"
+    Write-Host ""
+    Write-Host "Examples:"
+    Write-Host "  .\run-target-security-scan.ps1                    # Scan current directory"
+    Write-Host "  .\run-target-security-scan.ps1 'C:\path\to\project' full"
+    Write-Host "  .\run-target-security-scan.ps1 '.\my-project' quick"
     exit 1
 }
 $TargetDir = (Resolve-Path $TargetDir).Path

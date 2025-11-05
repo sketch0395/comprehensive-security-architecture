@@ -1,6 +1,6 @@
 {
   "SchemaVersion": 2,
-  "CreatedAt": "2025-11-05T15:00:19.206555444Z",
+  "CreatedAt": "2025-11-05T16:57:28.906151461Z",
   "ArtifactName": "ubuntu:22.04",
   "ArtifactType": "container_image",
   "Metadata": {

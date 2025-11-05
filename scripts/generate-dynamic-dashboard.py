@@ -208,44 +208,53 @@ class SecurityDashboardGenerator:
     
     def analyze_sonarqube_data(self):
         """Parse SonarQube results from JSON files"""
-        sonarqube_dir = self.reports_dir / 'sonar-reports'
+        # Check both possible locations for SonarQube data
+        sonarqube_dirs = [
+            self.reports_dir / 'sonar-reports',
+            self.reports_dir / 'security-reports' / 'raw-data' / 'SonarQube'
+        ]
+        
         coverage = "N/A"
         tests = "N/A"
         issues = 0
         passed_tests = "N/A"
         
-        if sonarqube_dir.exists():
-            for json_file in sonarqube_dir.glob('*.json'):
-                data = self.load_json_safely(json_file)
-                if data:
-                    # Parse our custom SonarQube analysis results format
-                    if 'test_results' in data and 'coverage' in data:
-                        # Our custom format from the analysis script
-                        test_results = data['test_results']
-                        coverage_data = data['coverage']
+        for sonarqube_dir in sonarqube_dirs:
+            if sonarqube_dir.exists():
+                for json_file in sonarqube_dir.glob('*.json'):
+                    data = self.load_json_safely(json_file)
+                    if data:
+                        # Parse our custom SonarQube analysis results format
+                        if 'test_results' in data and 'coverage' in data:
+                            # Our custom format from the analysis script
+                            test_results = data['test_results']
+                            coverage_data = data['coverage']
+                            
+                            coverage = f"{coverage_data.get('statement_coverage', 0):.1f}%"
+                            tests = test_results.get('total_tests', 'N/A')
+                            passed_tests = test_results.get('passed_tests', 'N/A')
+                            issues = test_results.get('failed_tests', 0)
+                            
+                        # Parse standard SonarQube API format (if available)
+                        elif 'component' in data and 'measures' in data['component']:
+                            measures = data['component']['measures']
+                            for measure in measures:
+                                if measure.get('metric') == 'coverage':
+                                    coverage = f"{float(measure.get('value', 0)):.1f}%"
+                                elif measure.get('metric') == 'tests':
+                                    tests = measure.get('value', 'N/A')
                         
-                        coverage = f"{coverage_data.get('statement_coverage', 0):.1f}%"
-                        tests = test_results.get('total_tests', 'N/A')
-                        passed_tests = test_results.get('passed_tests', 'N/A')
-                        issues = test_results.get('failed_tests', 0)
+                        # Parse SonarQube issues format
+                        elif 'issues' in data:
+                            issues = len(data['issues'])
                         
-                    # Parse standard SonarQube API format (if available)
-                    elif 'component' in data and 'measures' in data['component']:
-                        measures = data['component']['measures']
-                        for measure in measures:
-                            if measure.get('metric') == 'coverage':
-                                coverage = f"{float(measure.get('value', 0)):.1f}%"
-                            elif measure.get('metric') == 'tests':
-                                tests = measure.get('value', 'N/A')
-                    
-                    # Parse SonarQube issues format
-                    elif 'issues' in data:
-                        issues = len(data['issues'])
-                    
-                    break  # Use first valid file found
+                        break  # Use first valid file found
+                if coverage != "N/A":  # Found data, stop searching
+                    break
         
         # Determine status based on data availability and results
-        if sonarqube_dir.exists() and coverage != "N/A":
+        has_data = coverage != "N/A"
+        if has_data:
             coverage_val = float(coverage.replace('%', ''))
             if coverage_val >= 90:
                 status = 'good'
@@ -261,7 +270,7 @@ class SecurityDashboardGenerator:
             'tests': tests,
             'passed_tests': passed_tests,
             'issues': issues,
-            'has_data': sonarqube_dir.exists() and coverage != "N/A",
+            'has_data': has_data,
             'status': status
         }
     

@@ -223,3 +223,18 @@ Data read: 128.48 MiB (ratio 4.56:1)
 Time: 69.572 sec (1 m 9 s)
 Start Date: 2025:11:05 14:40:19
 End Date:   2025:11:05 14:41:29
+
+-------------------------------------------------------------------------------
+
+
+----------- SCAN SUMMARY -----------
+Known viruses: 8708684
+Engine version: 1.5.1
+Scanned directories: 424
+Scanned files: 1126
+Infected files: 0
+Data scanned: 586.09 MiB
+Data read: 128.48 MiB (ratio 4.56:1)
+Time: 72.234 sec (1 m 12 s)
+Start Date: 2025:11:05 16:38:03
+End Date:   2025:11:05 16:39:15
