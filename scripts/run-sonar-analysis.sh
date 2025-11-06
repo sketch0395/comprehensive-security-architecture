@@ -176,48 +176,96 @@ echo "Step 1: Running tests with coverage..."
 echo "============================================"
 echo "Target directory: $REPO_PATH"
 
-# Check if this is a Node.js project with frontend
+# Enhanced project detection to handle both local and external projects
+PROJECT_TYPE="unknown"
+RUN_TESTS=false
+
+# Check for different project structures
 if [ -d "$REPO_PATH/frontend" ] && [ -f "$REPO_PATH/frontend/package.json" ]; then
-  echo "✅ Frontend directory found - running tests with coverage"
+  PROJECT_TYPE="frontend_subproject"
+  SOURCES_PATH="$REPO_PATH/frontend/src"
+  TEST_DIR="$REPO_PATH/frontend"
+  RUN_TESTS=true
+  echo "✅ Frontend subproject detected"
+elif [ -f "$REPO_PATH/package.json" ] && [ -d "$REPO_PATH/src" ]; then
+  PROJECT_TYPE="nodejs_with_src"
+  SOURCES_PATH="$REPO_PATH/src"
+  TEST_DIR="$REPO_PATH"
+  RUN_TESTS=true
+  echo "✅ Node.js project with src/ detected"
+elif [ -f "$REPO_PATH/package.json" ]; then
+  PROJECT_TYPE="nodejs_root"
+  SOURCES_PATH="$REPO_PATH"
+  TEST_DIR="$REPO_PATH"
+  RUN_TESTS=true
+  echo "✅ Node.js project detected"
+elif [ -d "$REPO_PATH/src" ]; then
+  PROJECT_TYPE="generic_with_src"
+  SOURCES_PATH="$REPO_PATH/src"
+  TEST_DIR="$REPO_PATH"
+  echo "✅ Generic project with src/ detected"
+else
+  PROJECT_TYPE="generic"
+  SOURCES_PATH="$REPO_PATH"
+  TEST_DIR="$REPO_PATH"
+  echo "⚠️  Generic project structure - using target directory"
+fi
+
+echo "📂 Project type: $PROJECT_TYPE"
+echo "📁 Sources path: $SOURCES_PATH"
+echo "🧪 Test directory: $TEST_DIR"
+
+# Run tests if it's a Node.js project
+if [ "$RUN_TESTS" = true ]; then
+  echo "✅ Running tests with coverage..."
   
   # Create a temporary file to capture test output
   TEST_OUTPUT_FILE=$(mktemp)
   
-  cd "$REPO_PATH/frontend"
+  cd "$TEST_DIR"
   
-  # Run tests and capture output for parsing
-  echo "🧪 Running Vitest with coverage..."
-  npx vitest --run --coverage --exclude "**/App.test.tsx" --reporter=json > "$TEST_OUTPUT_FILE" 2>&1
-  test_exit_code=$?
-  
-  # Try to parse test results if JSON output exists
-  if [ -f "$TEST_OUTPUT_FILE" ] && grep -q "testResults\|numTotalTests" "$TEST_OUTPUT_FILE" 2>/dev/null; then
-    echo "✅ Test results captured for analysis"
+  # Detect test framework and run appropriate command
+  if [ -f "package.json" ]; then
+    if grep -q "vitest" "package.json" 2>/dev/null; then
+      echo "🧪 Running Vitest with coverage..."
+      npx vitest --run --coverage --exclude "**/App.test.tsx" --reporter=json > "$TEST_OUTPUT_FILE" 2>&1
+      test_exit_code=$?
+    elif grep -q "jest" "package.json" 2>/dev/null; then
+      echo "🧪 Running Jest with coverage..."
+      npm test -- --coverage --watchAll=false --silent --reporter=json > "$TEST_OUTPUT_FILE" 2>&1
+      test_exit_code=$?
+    elif grep -q "\"test\"" "package.json" 2>/dev/null; then
+      echo "🧪 Running npm test..."
+      npm test > "$TEST_OUTPUT_FILE" 2>&1
+      test_exit_code=$?
+    else
+      echo "⚠️  No recognized test framework found"
+      test_exit_code=1
+    fi
+    
+    # Try to parse test results if JSON output exists
+    if [ -f "$TEST_OUTPUT_FILE" ] && grep -q "testResults\|numTotalTests" "$TEST_OUTPUT_FILE" 2>/dev/null; then
+      echo "✅ Test results captured for analysis"
+    else
+      echo "⚠️  Test output format not recognized - will use basic detection"
+    fi
+    
+    if [ $test_exit_code -ne 0 ]; then
+      echo "⚠️  Some tests failed, but continuing with SonarQube analysis..."
+      echo "💡 Note: Fix test failures for complete analysis"
+    else
+      echo "✅ All tests passed successfully"
+    fi
+    
+    # Save test output location for later parsing
+    TEST_RESULTS_FILE="$TEST_OUTPUT_FILE"
   else
-    echo "⚠️  Test output format not recognized - will use basic detection"
+    echo "⚠️  No package.json found in test directory"
   fi
-  
-  if [ $test_exit_code -ne 0 ]; then
-    echo "⚠️  Some tests failed, but continuing with SonarQube analysis..."
-    echo "💡 Note: Fix test failures for complete analysis"
-  else
-    echo "✅ All tests passed successfully"
-  fi
-  
-  # Save test output location for later parsing
-  TEST_RESULTS_FILE="$TEST_OUTPUT_FILE"
   
   cd - > /dev/null
-  SOURCES_PATH="$REPO_PATH/frontend/src"
-elif [ -d "$REPO_PATH/src" ]; then
-  echo "✅ Source directory found - using src/ for analysis"
-  SOURCES_PATH="$REPO_PATH/src"
-elif [ -f "$REPO_PATH/package.json" ]; then
-  echo "✅ Node.js project detected - using project root for analysis"
-  SOURCES_PATH="$REPO_PATH"
 else
-  echo "⚠️  No standard project structure found - using target directory"
-  SOURCES_PATH="$REPO_PATH"
+  echo "📋 Skipping test execution - will analyze existing coverage data"
 fi
 
 echo ""
