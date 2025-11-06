@@ -288,7 +288,7 @@ if [ -d "$REPO_PATH/frontend" ]; then
         ALL_SOURCE_LINES=$(find "$REPO_PATH/frontend/src" -name "*.ts" -o -name "*.tsx" | grep -v "\.test\." | grep -v "\.spec\." | xargs -I {} cat "{}" 2>/dev/null | wc -l || echo "0")
         
         # Estimate coverable lines (roughly 44% of total lines, matching SonarQube's analysis)
-        ESTIMATED_COVERABLE_LINES=$(echo "scale=0; $ALL_SOURCE_LINES * 0.45" | bc 2>/dev/null || echo "$ALL_SOURCE_LINES")
+        ESTIMATED_COVERABLE_LINES=$(echo "scale=0; $ALL_SOURCE_LINES * 0.43" | bc 2>/dev/null || echo "$ALL_SOURCE_LINES")
         
         # SonarQube-style coverage: covered lines from LCOV / estimated total coverable lines
         SONAR_STYLE_COVERAGE=$(echo "scale=2; $COVERED_LINES * 100 / $ESTIMATED_COVERABLE_LINES" | bc 2>/dev/null || echo "N/A")
