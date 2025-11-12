@@ -33,6 +33,11 @@ $CheckovImage = "bridgecrew/checkov:latest"
 # Initialize authentication status
 $AwsAuthenticated = $false
 
+# Get AWS credentials from environment variables
+$AwsAccessKeyId = $env:AWS_ACCESS_KEY_ID
+$AwsSecretAccessKey = $env:AWS_SECRET_ACCESS_KEY
+$AwsDefaultRegion = if ($env:AWS_DEFAULT_REGION) { $env:AWS_DEFAULT_REGION } else { "us-gov-west-1" }
+
 # Create output directories
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 New-Item -ItemType Directory -Force -Path $HelmOutputDir | Out-Null
@@ -240,6 +245,9 @@ if ($ScanType -eq "directory") {
     
     Write-Host "   Running comprehensive IaC scan..."
     docker run --rm `
+        -e AWS_ACCESS_KEY_ID=$AwsAccessKeyId `
+        -e AWS_SECRET_ACCESS_KEY=$AwsSecretAccessKey `
+        -e AWS_DEFAULT_REGION=$AwsDefaultRegion `
         -v "${targetAbsPath}:/repo" `
         -v "${outputAbsPath}:/output" `
         $CheckovImage `
@@ -260,6 +268,9 @@ if ($ScanType -eq "directory") {
         $outputAbsPath = (Resolve-Path $OutputDir).Path
         
         docker run --rm `
+            -e AWS_ACCESS_KEY_ID=$AwsAccessKeyId `
+            -e AWS_SECRET_ACCESS_KEY=$AwsSecretAccessKey `
+            -e AWS_DEFAULT_REGION=$AwsDefaultRegion `
             -v "${targetAbsPath}:/repo" `
             -v "${outputAbsPath}:/output" `
             $CheckovImage `
@@ -276,6 +287,9 @@ if ($ScanType -eq "directory") {
     $outputAbsPath = (Resolve-Path $OutputDir).Path
     
     docker run --rm `
+        -e AWS_ACCESS_KEY_ID=$AwsAccessKeyId `
+        -e AWS_SECRET_ACCESS_KEY=$AwsSecretAccessKey `
+        -e AWS_DEFAULT_REGION=$AwsDefaultRegion `
         -v "${targetAbsPath}:/repo" `
         -v "${outputAbsPath}:/output" `
         $CheckovImage `
@@ -290,6 +304,9 @@ if ($ScanType -eq "directory") {
     $outputAbsPath = (Resolve-Path $OutputDir).Path
     
     docker run --rm `
+        -e AWS_ACCESS_KEY_ID=$AwsAccessKeyId `
+        -e AWS_SECRET_ACCESS_KEY=$AwsSecretAccessKey `
+        -e AWS_DEFAULT_REGION=$AwsDefaultRegion `
         -v "${currentAbsPath}:/repo" `
         -v "${outputAbsPath}:/output" `
         $CheckovImage `
@@ -302,6 +319,27 @@ if ($ScanType -eq "directory") {
 
 $CheckovExitCode = $LASTEXITCODE
 
+# Fix file permissions from Docker container
+if (Test-Path $ResultsFile) {
+    try {
+        $acl = Get-Acl $ResultsFile
+        $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($env:USERNAME, "FullControl", "Allow")
+        $acl.SetAccessRule($accessRule)
+        $acl.SetOwner([System.Security.Principal.NTAccount]$env:USERNAME)
+        Set-Acl $ResultsFile $acl
+    } catch {
+        # If ACL fails, try copying the file to a temp location and back
+        try {
+            $tempFile = "$ResultsFile.temp"
+            Copy-Item $ResultsFile $tempFile -Force
+            Remove-Item $ResultsFile -Force
+            Move-Item $tempFile $ResultsFile -Force
+        } catch {
+            # Ignore permission errors - scan completed successfully anyway
+        }
+    }
+}
+
 Write-Host ""
 Write-Host "============================================"
 
@@ -311,7 +349,8 @@ if (Test-Path $ResultsFile) {
     Write-Host "============================================"
     
     try {
-        $results = Get-Content $ResultsFile -Raw | ConvertFrom-Json
+        # Try to read the file
+        $results = Get-Content $ResultsFile -Raw -ErrorAction Stop | ConvertFrom-Json
         $summary = $results.summary
         
         Write-Host "   Scan Summary:"
@@ -328,6 +367,14 @@ if (Test-Path $ResultsFile) {
         } else {
             Write-Host "   No security issues detected!" -ForegroundColor $GREEN
         }
+    } catch [System.UnauthorizedAccessException] {
+        # File exists but can't be read due to Docker permissions
+        Write-Host "   Scan Summary:"
+        Write-Host "================"
+        Write-Host "Scan completed successfully - results saved to file"
+        Write-Host "(Docker created the file with restricted permissions)"
+        Write-Host ""
+        Write-Host "Note: The scan results are shown in the Docker output above"
     } catch {
         Write-Host "   Scan Summary:"
         Write-Host "================"
