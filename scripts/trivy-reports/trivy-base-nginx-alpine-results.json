@@ -1,6 +1,6 @@
 {
   "SchemaVersion": 2,
-  "CreatedAt": "2025-11-13T14:16:48.441932794Z",
+  "CreatedAt": "2025-11-13T15:39:10.123237596Z",
   "ArtifactName": "nginx:alpine",
   "ArtifactType": "container_image",
   "Metadata": {

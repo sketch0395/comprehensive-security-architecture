@@ -1,5 +1,5 @@
 # Complete Security Scan Orchestration Script
-# Runs all eight security layers with multi-target scanning capabilities
+# Runs all eight security layers plus report consolidation (9 steps total) with multi-target scanning capabilities
 # Usage: .\run-complete-security-scan.ps1 [quick|full|images|analysis]
 
 param(
@@ -85,6 +85,7 @@ switch ($ScanType) {
         Invoke-SecurityTool "SonarQube Code Quality" "$ScriptDir\run-sonar-analysis.ps1"
         Invoke-SecurityTool "Grype Vulnerability Scanning" "$ScriptDir\run-grype-scan.ps1" "filesystem"
         Invoke-SecurityTool "Trivy Security Analysis" "$ScriptDir\run-trivy-scan.ps1" "filesystem"
+        Invoke-SecurityTool "Report Consolidation" "$ScriptDir\consolidate-security-reports.ps1"
     }
     
     "images" {
@@ -97,6 +98,7 @@ switch ($ScanType) {
         Invoke-SecurityTool "Trivy Container Images" "$ScriptDir\run-trivy-scan.ps1" "images"
         Invoke-SecurityTool "Trivy Base Images" "$ScriptDir\run-trivy-scan.ps1" "base"
         Invoke-SecurityTool "Xeol End-of-Life Detection" "$ScriptDir\run-xeol-scan.ps1"
+        Invoke-SecurityTool "Report Consolidation" "$ScriptDir\consolidate-security-reports.ps1"
     }
     
     "analysis" {
@@ -108,7 +110,7 @@ switch ($ScanType) {
     }
     
     "full" {
-        Write-Section "Complete Eight-Layer Security Architecture Scan"
+        Write-Section "Complete Nine-Step Security Architecture Scan"
         
         Write-Host "     Layer 1: Code Quality & Test Coverage" -ForegroundColor $PURPLE
         Invoke-SecurityTool "SonarQube Analysis" "$ScriptDir\run-sonar-analysis.ps1"
@@ -139,19 +141,10 @@ switch ($ScanType) {
         
         Write-Host "    Layer 8: End-of-Life Detection" -ForegroundColor $PURPLE
         Invoke-SecurityTool "Xeol EOL Detection" "$ScriptDir\run-xeol-scan.ps1"
+        
+        Write-Host "   📊 Step 9: Security Report Consolidation" -ForegroundColor $PURPLE
+        Invoke-SecurityTool "Report Consolidation" "$ScriptDir\consolidate-security-reports.ps1"
     }
-}
-
-# Final consolidation
-Write-Section "Security Report Consolidation"
-Write-Host "   Consolidating all security reports..." -ForegroundColor $CYAN
-
-$ConsolidateScript = Join-Path $ScriptDir "consolidate-security-reports.ps1"
-if (Test-Path $ConsolidateScript) {
-    & $ConsolidateScript
-    Write-Host "  Security reports consolidated" -ForegroundColor $GREEN
-} else {
-    Write-Host "    Consolidation script not found" -ForegroundColor $YELLOW
 }
 
 Write-Host ""

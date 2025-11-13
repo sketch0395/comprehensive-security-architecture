@@ -1,7 +1,7 @@
 # Grype Security Report
 
 **Scan Type:** grype-base-node-18-alpine-results  
-**Generated:** Thu Nov  6 08:32:29 CST 2025  
+**Generated:** Thu Nov 13 09:03:51 CST 2025  
 
 ## Summary
 
@@ -70,13 +70,7 @@
 **Package:** libssl3 @ 3.3.3-r0  
 **Description:** No description available...  
 
-### 10. CVE-2025-5889
-
-**Severity:** LOW  
-**Package:** brace-expansion @ 2.0.1  
-**Description:** brace-expansion Regular Expression Denial of Service vulnerability...  
-
-### 11. CVE-2025-23167
+### 10. CVE-2025-23167
 
 **Severity:** MEDIUM  
 **Package:** node @ 18.20.8  
@@ -85,39 +79,45 @@ This inconsistency enables request smuggling, allowing attackers to bypass proxy
 
 The issue was resolved by upg...  
 
-### 12. CVE-2025-46394
+### 11. CVE-2025-46394
 
 **Severity:** LOW  
 **Package:** busybox @ 1.37.0-r12  
+**Description:** In tar in BusyBox through 1.37.0, a TAR archive can have filenames hidden from a listing through the use of terminal escape sequences....  
+
+### 12. CVE-2025-46394
+
+**Severity:** LOW  
+**Package:** busybox-binsh @ 1.37.0-r12  
 **Description:** In tar in BusyBox through 1.37.0, a TAR archive can have filenames hidden from a listing through the use of terminal escape sequences....  
 
 ### 13. CVE-2025-46394
 
 **Severity:** LOW  
-**Package:** busybox-binsh @ 1.37.0-r12  
-**Description:** In tar in BusyBox through 1.37.0, a TAR archive can have filenames hidden from a listing through the use of terminal escape sequences....  
-
-### 14. CVE-2025-46394
-
-**Severity:** LOW  
 **Package:** ssl_client @ 1.37.0-r12  
 **Description:** In tar in BusyBox through 1.37.0, a TAR archive can have filenames hidden from a listing through the use of terminal escape sequences....  
 
-### 15. CVE-2024-58251
+### 14. CVE-2024-58251
 
 **Severity:** LOW  
 **Package:** busybox @ 1.37.0-r12  
 **Description:** In netstat in BusyBox through 1.37.0, local users can launch of network application with an argv[0] containing an ANSI terminal escape sequence, leading to a denial of service (terminal locked up) when netstat is used by a victim....  
 
-### 16. CVE-2024-58251
+### 15. CVE-2024-58251
 
 **Severity:** LOW  
 **Package:** busybox-binsh @ 1.37.0-r12  
 **Description:** In netstat in BusyBox through 1.37.0, local users can launch of network application with an argv[0] containing an ANSI terminal escape sequence, leading to a denial of service (terminal locked up) when netstat is used by a victim....  
 
-### 17. CVE-2024-58251
+### 16. CVE-2024-58251
 
 **Severity:** LOW  
 **Package:** ssl_client @ 1.37.0-r12  
 **Description:** In netstat in BusyBox through 1.37.0, local users can launch of network application with an argv[0] containing an ANSI terminal escape sequence, leading to a denial of service (terminal locked up) when netstat is used by a victim....  
+
+### 17. CVE-2025-5889
+
+**Severity:** LOW  
+**Package:** brace-expansion @ 2.0.1  
+**Description:** brace-expansion Regular Expression Denial of Service vulnerability...  
 

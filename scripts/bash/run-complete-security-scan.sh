@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Complete Security Scan Orchestration Script
-# Runs all eight security layers with multi-target scanning capabilities
+# Runs all eight security layers plus report consolidation (9 steps total) with multi-target scanning capabilities
 # Usage: ./run-complete-security-scan.sh [quick|full|images|analysis]
 
 set -e
@@ -91,6 +91,7 @@ case "$SCAN_TYPE" in
         run_security_tool "TruffleHog Secret Detection" "./run-trufflehog-scan.sh" "filesystem"
         run_security_tool "Grype Vulnerability Scanning" "./run-grype-scan.sh" "filesystem"
         run_security_tool "Trivy Security Analysis" "./run-trivy-scan.sh" "filesystem"
+        run_security_tool "Report Consolidation" "./consolidate-security-reports.sh"
         ;;
         
     "images")
@@ -103,6 +104,7 @@ case "$SCAN_TYPE" in
         run_security_tool "Trivy Container Images" "./run-trivy-scan.sh" "images"
         run_security_tool "Trivy Base Images" "./run-trivy-scan.sh" "base"
         run_security_tool "Xeol End-of-Life Detection" "./run-xeol-scan.sh"
+        run_security_tool "Report Consolidation" "./consolidate-security-reports.sh"
         ;;
         
     "analysis")
@@ -116,7 +118,7 @@ case "$SCAN_TYPE" in
         ;;
         
     "full")
-        print_section "Complete Eight-Layer Security Architecture Scan"
+        print_section "Complete Nine-Step Security Architecture Scan"
         
         echo -e "${PURPLE}🏗️  Layer 1: Code Quality & Test Coverage${NC}"
         run_security_tool "SonarQube Analysis" "./run-sonar-analysis.sh"
@@ -147,6 +149,9 @@ case "$SCAN_TYPE" in
         
         echo -e "${PURPLE}⚰️  Layer 8: End-of-Life Detection${NC}"
         run_security_tool "Xeol EOL Detection" "./run-xeol-scan.sh"
+        
+        echo -e "${PURPLE}📊 Step 9: Security Report Consolidation${NC}"
+        run_security_tool "Report Consolidation" "./consolidate-security-reports.sh"
         ;;
         
     *)
