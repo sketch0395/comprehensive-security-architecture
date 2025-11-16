@@ -16,9 +16,13 @@ NC='\033[0m' # No Color
 
 # Set up paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPORTS_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")/reports"
+REPORTS_ROOT="$(dirname "$(dirname "$SCRIPT_DIR)")/reports"
 OUTPUT_DIR="$REPORTS_ROOT/helm-reports"
-SCAN_LOG="$OUTPUT_DIR/helm-build.log"
+
+# Add timestamp for historical preservation
+TIMESTAMP=$(date '+%Y-%m-%d_%H-%M-%S')
+SCAN_LOG="$OUTPUT_DIR/helm-build-$TIMESTAMP.log"
+CURRENT_LOG="$OUTPUT_DIR/helm-build.log"
 
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
@@ -144,6 +148,9 @@ echo "• Kubernetes Security: https://kubernetes.io/docs/concepts/security/"
 echo "• Helm Security Guide: https://helm.sh/docs/topics/security/"
 
 echo
+# Create current symlink for easy access
+ln -sf "$(basename "$SCAN_LOG")" "$CURRENT_LOG"
+
 echo "============================================"
 echo -e "${GREEN}✅ Helm chart building completed successfully!${NC}"
 echo "============================================"

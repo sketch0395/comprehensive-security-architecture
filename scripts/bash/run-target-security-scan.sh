@@ -404,6 +404,30 @@ if [[ -f "$SCRIPT_DIR/consolidate-security-reports.sh" ]]; then
         echo -e "${RED}❌ Report consolidation failed${NC}"
         analysis_success=false
     fi
+    
+    # Generate Critical & High Severity Findings Summary
+    echo ""
+    echo -e "${BLUE}🚨 Generating Critical & High Severity Findings Summary...${NC}"
+    if [[ -f "$SCRIPT_DIR/generate-critical-high-summary.sh" ]]; then
+        cd "$REPO_ROOT" && "$SCRIPT_DIR/generate-critical-high-summary.sh"
+        summary_result=$?
+        
+        if [[ $summary_result -eq 0 ]]; then
+            echo -e "${GREEN}✅ Critical & High severity summary generated successfully${NC}"
+            
+            # Display summary access information
+            if [[ -f "$REPO_ROOT/reports/security-reports/critical-high-findings-summary.html" ]]; then
+                echo -e "${CYAN}🎯 Critical/High Summary: $REPO_ROOT/reports/security-reports/critical-high-findings-summary.html${NC}"
+            fi
+            if [[ -f "$REPO_ROOT/reports/security-reports/critical-high-findings-summary.json" ]]; then
+                echo -e "${CYAN}📊 JSON Summary: $REPO_ROOT/reports/security-reports/critical-high-findings-summary.json${NC}"
+            fi
+        else
+            echo -e "${YELLOW}⚠️  Critical & High severity summary generation had issues${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠️  Critical & High severity summary script not found${NC}"
+    fi
 else
     echo -e "${YELLOW}⚠️  Report consolidation script not found${NC}"
 fi

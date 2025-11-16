@@ -40,8 +40,10 @@ echo "Target: $REPO_PATH" >> "$SCAN_LOG"
 run_grype_scan() {
     local scan_type="$1"
     local target="$2"
-    local output_file="$OUTPUT_DIR/grype-${scan_type}-results.json"
-    local sbom_file="$OUTPUT_DIR/sbom-${scan_type}.json"
+    local output_file="$OUTPUT_DIR/grype-${scan_type}-results-$TIMESTAMP.json"
+    local sbom_file="$OUTPUT_DIR/sbom-${scan_type}-$TIMESTAMP.json"
+    local current_file="$OUTPUT_DIR/grype-${scan_type}-results.json"
+    local current_sbom="$OUTPUT_DIR/sbom-${scan_type}.json"
     
     echo -e "${BLUE}🔍 Scanning ${scan_type}: ${target}${NC}"
     
@@ -67,6 +69,10 @@ run_grype_scan() {
         local count=$(cat "$output_file" | jq '.matches | length' 2>/dev/null || echo "0")
         echo "✅ ${scan_type} scan completed: $count vulnerabilities found"
         echo "${scan_type} scan: $count vulnerabilities" >> "$SCAN_LOG"
+        
+        # Create/update current symlinks for easy access
+        ln -sf "$(basename "$output_file")" "$current_file"
+        ln -sf "$(basename "$sbom_file")" "$current_sbom"
     fi
 }
 

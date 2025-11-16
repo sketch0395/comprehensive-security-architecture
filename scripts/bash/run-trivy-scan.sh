@@ -16,9 +16,12 @@ NC='\033[0m' # No Color
 
 # Set up paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPORTS_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")/reports"
+REPORTS_ROOT="$(dirname "$(dirname "$SCRIPT_DIR)")/reports"
 OUTPUT_DIR="$REPORTS_ROOT/trivy-reports"
-SCAN_LOG="$OUTPUT_DIR/trivy-scan.log"
+
+# Add timestamp for historical preservation
+TIMESTAMP=$(date '+%Y-%m-%d_%H-%M-%S')
+SCAN_LOG="$OUTPUT_DIR/trivy-scan-$TIMESTAMP.log"
 
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
@@ -30,10 +33,11 @@ echo -e "${WHITE}============================================${NC}"
 echo
 
 # Function to scan a target
-scan_target() {
+run_trivy_scan() {
     local scan_type="$1"
     local target="$2"
-    local output_file="$3"
+    local output_file="$OUTPUT_DIR/trivy-${scan_type}-results-$TIMESTAMP.json"
+    local current_file="$OUTPUT_DIR/trivy-${scan_type}-results.json"
     
     if [ ! -z "$target" ] && [ ! -z "$output_file" ]; then
         echo -e "${BLUE}🔍 Scanning ${scan_type}: ${target}${NC}"

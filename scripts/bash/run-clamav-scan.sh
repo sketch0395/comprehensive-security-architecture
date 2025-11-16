@@ -56,7 +56,7 @@ if command -v docker &> /dev/null; then
         -v "$REPO_PATH:/workspace:ro" \
         -v "$OUTPUT_DIR:/output" \
         clamav/clamav:latest \
-        clamscan -r --log=/output/clamav-detailed.log /workspace >> "$SCAN_LOG" 2>&1
+        clamscan -r --log=/output/clamav-detailed-$TIMESTAMP_ID.log /workspace >> "$SCAN_LOG" 2>&1
     
     SCAN_RESULT=$?
     
@@ -68,8 +68,11 @@ else
     echo "Creating placeholder results..."
     
     # Create empty results
-    echo "ClamAV scan skipped - Docker not available" > "$OUTPUT_DIR/clamav-detailed.log"
+    echo "ClamAV scan skipped - Docker not available" > "$OUTPUT_DIR/clamav-detailed-$TIMESTAMP_ID.log"
     echo "No malware detected (scan not performed)" >> "$SCAN_LOG"
+    
+    # Create current symlink for consistency
+    ln -sf "clamav-detailed-$TIMESTAMP_ID.log" "$OUTPUT_DIR/clamav-detailed.log"
     SCAN_RESULT=0
 fi
 

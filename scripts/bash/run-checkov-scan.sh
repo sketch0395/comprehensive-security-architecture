@@ -12,8 +12,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPORTS_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 HELM_OUTPUT_DIR="$REPORTS_ROOT/reports/helm-packages"
 OUTPUT_DIR="$REPORTS_ROOT/reports/checkov-reports"
-RESULTS_FILE="$OUTPUT_DIR/checkov-results.json"
-SCAN_LOG="$OUTPUT_DIR/checkov-scan.log"
+# Add timestamp for historical preservation
+TIMESTAMP_ID=$(date '+%Y-%m-%d_%H-%M-%S')
+RESULTS_FILE="$OUTPUT_DIR/checkov-results-$TIMESTAMP_ID.json"
+CURRENT_FILE="$OUTPUT_DIR/checkov-results.json"
+SCAN_LOG="$OUTPUT_DIR/checkov-scan-$TIMESTAMP_ID.log"
 TIMESTAMP=$(date)
 
 # Colors for output
@@ -115,6 +118,10 @@ if [ -f "$RESULTS_FILE" ]; then
             echo "Review detailed results for specific recommendations"
         else
             echo
+        fi
+        
+        # Create/update current symlink for easy access
+        ln -sf "$(basename "$RESULTS_FILE")" "$CURRENT_FILE"
             echo -e "${GREEN}🎉 No security issues detected!${NC}"
         fi
     else

@@ -16,9 +16,12 @@ NC='\033[0m' # No Color
 
 # Set up paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPORTS_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")/reports"
+REPORTS_ROOT="$(dirname "$(dirname "$SCRIPT_DIR)")/reports"
 OUTPUT_DIR="$REPORTS_ROOT/xeol-reports"
-SCAN_LOG="$OUTPUT_DIR/xeol-scan.log"
+
+# Add timestamp for historical preservation
+TIMESTAMP=$(date '+%Y-%m-%d_%H-%M-%S')
+SCAN_LOG="$OUTPUT_DIR/xeol-scan-$TIMESTAMP.log"
 
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
@@ -71,14 +74,19 @@ BASE_IMAGES=(
 for image in "${BASE_IMAGES[@]}"; do
     if command -v docker &> /dev/null; then
         echo -e "${BLUE}📦 Scanning base image: $image${NC}"
-        scan_target "image" "$image" "xeol-base-$(echo $image | tr ':/' '-')-results.json"
+        local image_name=$(echo $image | tr ':/' '-')
+        scan_target "image" "$image" "xeol-base-$image_name-results-$TIMESTAMP.json"
+        # Create current symlink
+        ln -sf "xeol-base-$image_name-results-$TIMESTAMP.json" "$OUTPUT_DIR/xeol-base-$image_name-results.json"
     fi
 done
 
 # Scan filesystem if target directory provided
 if [ ! -z "$1" ] && [ -d "$1" ]; then
     echo -e "${BLUE}📁 Scanning filesystem: $1${NC}"
-    scan_target "dir" "$1" "xeol-filesystem-results.json"
+    scan_target "dir" "$1" "xeol-filesystem-results-$TIMESTAMP.json"
+    # Create current symlink
+    ln -sf "xeol-filesystem-results-$TIMESTAMP.json" "$OUTPUT_DIR/xeol-filesystem-results.json"
 fi
 
 echo

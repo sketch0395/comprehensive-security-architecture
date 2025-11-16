@@ -40,7 +40,8 @@ echo "Target: $REPO_PATH" >> "$SCAN_LOG"
 run_trufflehog_scan() {
     local scan_type="$1"
     local target="$2"
-    local output_file="$OUTPUT_DIR/trufflehog-${scan_type}-results.json"
+    local output_file="$OUTPUT_DIR/trufflehog-${scan_type}-results-$TIMESTAMP.json"
+    local current_file="$OUTPUT_DIR/trufflehog-${scan_type}-results.json"
     
     echo -e "${BLUE}🔍 Scanning ${scan_type}: ${target}${NC}"
     
@@ -59,6 +60,9 @@ run_trufflehog_scan() {
         local count=$(cat "$output_file" | jq '. | length' 2>/dev/null || echo "0")
         echo "✅ ${scan_type} scan completed: $count items found"
         echo "${scan_type} scan: $count items" >> "$SCAN_LOG"
+        
+        # Create/update current symlink for easy access
+        ln -sf "$(basename "$output_file")" "$current_file"
     fi
 }
 
