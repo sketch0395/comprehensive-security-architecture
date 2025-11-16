@@ -241,7 +241,9 @@ echo "Timestamp: $(date)"
 echo ""
 
 echo -e "${CYAN}📁 Generated Reports:${NC}"
-find ../../reports -name "*-reports" -type d 2>/dev/null | sort | while read -r dir; do
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPORTS_ROOT="$(dirname "$(dirname "$SCRIPT_DIR)")"
+find "$REPORTS_ROOT/reports" -name "*-reports" -type d 2>/dev/null | sort | while read -r dir; do
     if [[ -d "$dir" ]]; then
         report_count=$(find "$dir" -name "*.json" -o -name "*.html" -o -name "*.xml" | wc -l)
         echo "  📂 $dir ($report_count files)"
@@ -269,8 +271,8 @@ echo -e "${CYAN}🚨 High-Priority Security Issues:${NC}"
 has_critical_issues=false
 
 # Check Grype results for high/critical vulnerabilities
-if [[ -f "../../reports/grype-reports/grype-filesystem-results.json" ]]; then
-    high_count=$(jq -r '[.matches[] | select(.vulnerability.severity == "High" or .vulnerability.severity == "Critical")] | length' "../../reports/grype-reports/grype-filesystem-results.json" 2>/dev/null || echo "0")
+if [[ -f "$REPORTS_ROOT/reports/grype-reports/grype-filesystem-results.json" ]]; then
+    high_count=$(jq -r '[.matches[] | select(.vulnerability.severity == "High" or .vulnerability.severity == "Critical")] | length' "$REPORTS_ROOT/reports/grype-reports/grype-filesystem-results.json" 2>/dev/null || echo "0")
     if [[ "$high_count" -gt 0 ]]; then
         echo -e "  ${RED}🔴 Grype: $high_count high/critical vulnerabilities found${NC}"
         has_critical_issues=true
@@ -278,8 +280,8 @@ if [[ -f "../../reports/grype-reports/grype-filesystem-results.json" ]]; then
 fi
 
 # Check Trivy results for high/critical vulnerabilities
-if [[ -f "../../reports/trivy-reports/trivy-filesystem-results.json" ]]; then
-    trivy_critical=$(jq -r '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH" or .Severity == "CRITICAL")] | length' "../../reports/trivy-reports/trivy-filesystem-results.json" 2>/dev/null || echo "0")
+if [[ -f "$REPORTS_ROOT/reports/trivy-reports/trivy-filesystem-results.json" ]]; then
+    trivy_critical=$(jq -r '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH" or .Severity == "CRITICAL")] | length' "$REPORTS_ROOT/reports/trivy-reports/trivy-filesystem-results.json" 2>/dev/null || echo "0")
     if [[ "$trivy_critical" -gt 0 ]]; then
         echo -e "  ${RED}🔴 Trivy: $trivy_critical high/critical vulnerabilities found${NC}"
         has_critical_issues=true
@@ -287,16 +289,16 @@ if [[ -f "../../reports/trivy-reports/trivy-filesystem-results.json" ]]; then
 fi
 
 # Check TruffleHog for secrets
-if [[ -f "../../reports/trufflehog-reports/trufflehog-filesystem-results.json" ]]; then
-    secrets_count=$(jq '. | length' "../../reports/trufflehog-reports/trufflehog-filesystem-results.json" 2>/dev/null || echo "0")
+if [[ -f "$REPORTS_ROOT/reports/trufflehog-reports/trufflehog-filesystem-results.json" ]]; then
+    secrets_count=$(jq '. | length' "$REPORTS_ROOT/reports/trufflehog-reports/trufflehog-filesystem-results.json" 2>/dev/null || echo "0")
     if [[ "$secrets_count" -gt 0 ]]; then
         echo -e "  ${YELLOW}🟡 TruffleHog: $secrets_count potential secrets detected${NC}"
     fi
 fi
 
 # Check Xeol for EOL components
-if [[ -f "../../reports/xeol-reports/xeol-results.json" ]]; then
-    eol_count=$(jq '[.matches[] | select(.eol == true)] | length' "../../reports/xeol-reports/xeol-results.json" 2>/dev/null || echo "0")
+if [[ -f "$REPORTS_ROOT/reports/xeol-reports/xeol-results.json" ]]; then
+    eol_count=$(jq '[.matches[] | select(.eol == true)] | length' "$REPORTS_ROOT/reports/xeol-reports/xeol-results.json" 2>/dev/null || echo "0")
     if [[ "$eol_count" -gt 0 ]]; then
         echo -e "  ${YELLOW}🟡 Xeol: $eol_count end-of-life components detected${NC}"
     fi
