@@ -1,11 +1,11 @@
 {
-  "project": "tenant-metrostar-advana-marketplace-monolith-node",
-  "timestamp": "2025-11-17T15:03:55Z",
+  "project": "tenant-metrostar-advana-marketplace",
+  "timestamp": "2025-11-17T15:29:20Z",
   "host": "https://sonarqube.cdao.us",
-  "sources": "/Users/rnelson/Desktop/CDAO MarketPlace/Marketplace/advana-marketplace-monolith-node/src",
+  "sources": "/Users/rnelson/Desktop/CDAO MarketPlace/Marketplace/advana-marketplace/frontend/src",
   "test_results": {
-    "total_tests": 0,
-    "passed_tests": 0,
+    "total_tests": 956,
+    "passed_tests": 956,
     "skipped_tests": 0,
     "failed_tests": 0
   },
@@ -26,6 +26,6 @@
     "maintainability_rating": "N/A",
     "coverage_rating": "N/A"
   },
-  "status": "CONFIGURED",
+  "status": "PARTIAL_SUCCESS",
   "analysis_mode": "local_extraction"
 }
